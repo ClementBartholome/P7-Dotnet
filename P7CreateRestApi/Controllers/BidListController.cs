@@ -1,40 +1,111 @@
-using Dot.Net.WebApi.Domain;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Dot.Net.WebApi.Data;
+using Dot.Net.WebApi.Domain;
+using P7CreateRestApi.Models.Dto;
+using P7CreateRestApi.Repositories;
 
-namespace Dot.Net.WebApi.Controllers
+
+namespace P7CreateRestApi.Controllers
 {
-    [ApiController]
     [Route("[controller]")]
+    [ApiController]
     public class BidListController : ControllerBase
     {
-        [HttpGet]
-        [Route("validate")]
-        public IActionResult Validate([FromBody] BidList bidList)
+        private readonly LocalDbContext _context;
+        private readonly BidRepository _bidListRepository;
+
+        public BidListController(LocalDbContext context, BidRepository bidListRepository)
         {
-            // TODO: check data valid and save to db, after saving return bid list
-            return Ok();
+            _context = context;
+            _bidListRepository = bidListRepository;
         }
 
+        // GET: BidList
         [HttpGet]
-        [Route("update/{id}")]
-        public IActionResult ShowUpdateForm(int id)
+        public async Task<ActionResult<IEnumerable<BidListDto>>> GetBidLists()
         {
-            return Ok();
+            return await _bidListRepository.GetBidLists();
         }
 
+        // GET: BidList/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<BidListDto>> GetBidList(int id)
+        {
+            var bidListDto = await _bidListRepository.GetBidList(id);
+
+            if (bidListDto == null)
+            {
+                return NotFound(new { message = "BidList not found with the provided id." });
+            }
+
+            return bidListDto;
+        }
+
+        // PUT: BidList/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateBidList(int id, BidListDto bidListDto)
+        {
+            if (id != bidListDto.BidListId)
+            {
+                return BadRequest(new { message = "The provided id does not match the id in the request." });
+            }
+
+            try
+            {
+                await _bidListRepository.UpdateBidList(id, bidListDto);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!BidListExists(id))
+                {
+                    return NotFound(new { message = "BidList not found with the provided id." });
+                }
+
+                throw;
+            }
+
+            return NoContent();
+        }
+
+        // POST: BidList
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        [Route("update/{id}")]
-        public IActionResult UpdateBid(int id, [FromBody] BidList bidList)
+        public async Task<ActionResult<BidList>> PostBidList(BidListDto bidListDto)
         {
-            // TODO: check required fields, if valid call service to update Bid and return list Bid
-            return Ok();
+            try
+            {
+                var bidList = await _bidListRepository.PostBidList(bidListDto);
+                return CreatedAtAction("GetBidList", new { id = bidList.BidListId }, bidList);
+            }
+            catch (Exception ex)
+            { 
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, new { message = "An error occurred while creating the BidList." });
+            }
+        }
+        
+
+        // DELETE: BidList/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteBidList(int id)
+        {
+            try
+            {
+                await _bidListRepository.DeleteBidList(id);
+                return NoContent();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500, new { message = "An error occurred while deleting the BidList." });
+            }
         }
 
-        [HttpDelete]
-        [Route("{id}")]
-        public IActionResult DeleteBid(int id)
+        private bool BidListExists(int id)
         {
-            return Ok();
+            return (_context.BidLists?.Any(e => e.BidListId == id)).GetValueOrDefault();
         }
     }
 }
