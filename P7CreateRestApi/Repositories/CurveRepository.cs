@@ -81,19 +81,17 @@ namespace P7CreateRestApi.Repositories
             return curvePoint;
         }
 
-        public async Task DeleteCurve(int id)
+        public async Task<bool> DeleteCurve(int id)
         {
-            if (!CurveExists(id))
+            var curvePoint = await _context.CurvePoints.FindAsync(id);
+            if (curvePoint == null)
             {
-                return;
+                return false;
             }
 
-            var curvePoint = await _context.CurvePoints.FindAsync(id);
-            if (curvePoint != null)
-            {
-                _context.CurvePoints.Remove(curvePoint);
-                await _context.SaveChangesAsync();
-            }
+            _context.CurvePoints.Remove(curvePoint);
+            await _context.SaveChangesAsync();
+            return true;
         }
         
         private bool CurveExists(int id)

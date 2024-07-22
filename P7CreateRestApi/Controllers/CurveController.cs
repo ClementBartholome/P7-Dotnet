@@ -110,7 +110,12 @@ namespace P7CreateRestApi.Controllers
             try
             {
                 _logger.LogInformation("Deleting CurvePoint");
-                await _curveRepository.DeleteCurve(id);
+                var result = await _curveRepository.DeleteCurve(id);
+                if (!result)
+                {
+                    return NotFound(new { message = "CurvePoint not found with the provided id." });
+                }
+
                 return Ok(new { message = "CurvePoint deleted successfully." });
             }
             catch (Exception e)
