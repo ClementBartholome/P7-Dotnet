@@ -1,59 +1,124 @@
-using Dot.Net.WebApi.Domain;
 using Microsoft.AspNetCore.Mvc;
+using P7CreateRestApi.Models.Dto;
+using P7CreateRestApi.Repositories;
+using System;
+using System.Threading.Tasks;
+using Dot.Net.WebApi.Domain;
 
-namespace Dot.Net.WebApi.Controllers
+namespace P7CreateRestApi.Controllers
 {
-    [ApiController]
     [Route("[controller]")]
+    [ApiController]
     public class TradeController : ControllerBase
     {
-        // TODO: Inject Trade service
+        private readonly TradeRepository _tradeRepository;
+        private readonly ILogger<TradeController> _logger;
 
-        [HttpGet]
-        [Route("list")]
-        public IActionResult Home()
+        public TradeController(TradeRepository tradeRepository, ILogger<TradeController> logger)
         {
-            // TODO: find all Trade, add to model
-            return Ok();
+            _tradeRepository = tradeRepository;
+            _logger = logger;
         }
 
         [HttpGet]
-        [Route("add")]
-        public IActionResult AddTrade([FromBody]Trade trade)
+        public async Task<ActionResult<IEnumerable<TradeDto>>> GetTrades()
         {
-            return Ok();
+            _logger.LogInformation("Retrieving Trades");
+            try
+            {
+                return await _tradeRepository.GetTrades();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500, new { message = "An error occurred while retrieving the Trades." });
+            }
         }
 
-        [HttpGet]
-        [Route("validate")]
-        public IActionResult Validate([FromBody]Trade trade)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<TradeDto>> GetTrade(int id)
         {
-            // TODO: check data valid and save to db, after saving return Trade list
-            return Ok();
+            try
+            {
+                _logger.LogInformation("Retrieving Trade");
+                var tradeDto = await _tradeRepository.GetTrade(id);
+
+                if (tradeDto == null)
+                {
+                    return NotFound(new { message = "Trade not found with the provided id." });
+                }
+
+                return tradeDto;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500, new { message = "An error occurred while retrieving the Trade." });
+            }
         }
 
-        [HttpGet]
-        [Route("update/{id}")]
-        public IActionResult ShowUpdateForm(int id)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateTrade(int id, TradeDto tradeDto)
         {
-            // TODO: get Trade by Id and to model then show to the form
-            return Ok();
+            if (id != tradeDto.TradeId)
+            {
+                return BadRequest(new { message = "The provided id does not match the id in the request." });
+            }
+
+            try
+            {
+                _logger.LogInformation("Updating Trade");
+                var updatedTrade = await _tradeRepository.UpdateTrade(id, tradeDto);
+                if (updatedTrade == null)
+                {
+                    return NotFound(new { message = "Trade not found with the provided id." });
+                }
+
+                return Ok(new { message = "Trade updated successfully.", updatedTrade });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return NotFound(new { message = "An error occurred while updating the Trade." });
+            }
         }
 
         [HttpPost]
-        [Route("update/{id}")]
-        public IActionResult UpdateTrade(int id, [FromBody] Trade trade)
+        public async Task<ActionResult<Trade>> PostTrade(TradeDto tradeDto)
         {
-            // TODO: check required fields, if valid call service to update Trade and return Trade list
-            return Ok();
+            try
+            {
+                _logger.LogInformation("Creating new Trade.");
+                var trade = await _tradeRepository.PostTrade(tradeDto);
+                return CreatedAtAction("GetTrade", new { id = trade.TradeId }, trade);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, new { message = "An error occurred while creating the Trade." });
+            }
         }
 
-        [HttpDelete]
-        [Route("{id}")]
-        public IActionResult DeleteTrade(int id)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteTrade(int id)
         {
-            // TODO: Find Trade by Id and delete the Trade, return to Trade list
-            return Ok();
+            try
+            {
+                _logger.LogInformation("Deleting Trade");
+                var result = await _tradeRepository.DeleteTrade(id);
+                
+                if (!result)
+                {
+                    return NotFound(new { message = "Trade not found with the provided id." });
+                }
+                
+                return Ok(new { message = "Trade deleted successfully." });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500, new { message = "An error occurred while deleting the Trade." });
+            }
         }
     }
 }
