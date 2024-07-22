@@ -1,59 +1,118 @@
-using Dot.Net.WebApi.Domain;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Dot.Net.WebApi.Data;
+using Dot.Net.WebApi.Domain;
+using P7CreateRestApi.Models.Dto;
+using P7CreateRestApi.Repositories;
 
-namespace Dot.Net.WebApi.Controllers
+namespace P7CreateRestApi.Controllers
 {
-    [ApiController]
     [Route("[controller]")]
+    [ApiController]
     public class RatingController : ControllerBase
     {
-        // TODO: Inject Rating service
+        private readonly RatingRepository _ratingRepository;
+        private readonly ILogger<RatingController> _logger;
 
-        [HttpGet]
-        [Route("list")]
-        public IActionResult Home()
+        public RatingController(RatingRepository ratingRepository, ILogger<RatingController> logger)
         {
-            // TODO: find all Rating, add to model
-            return Ok();
+            _ratingRepository = ratingRepository;
+            _logger = logger;
         }
 
         [HttpGet]
-        [Route("add")]
-        public IActionResult AddRatingForm([FromBody]Rating rating)
+        public async Task<ActionResult<IEnumerable<RatingDto>>> GetRatings()
         {
-            return Ok();
+            _logger.LogInformation("Retrieving Ratings");
+            try
+            {
+                return await _ratingRepository.GetRatings();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500, new { message = "An error occurred while retrieving the Ratings." });
+            }
         }
 
-        [HttpGet]
-        [Route("validate")]
-        public IActionResult Validate([FromBody]Rating rating)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<RatingDto>> GetRating(int id)
         {
-            // TODO: check data valid and save to db, after saving return Rating list
-            return Ok();
+            try
+            {
+                _logger.LogInformation("Retrieving Rating");
+                var ratingDto = await _ratingRepository.GetRating(id);
+
+                if (ratingDto == null)
+                {
+                    return NotFound(new { message = "Rating not found with the provided id." });
+                }
+
+                return ratingDto;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500, new { message = "An error occurred while retrieving the Rating." });
+            }
         }
 
-        [HttpGet]
-        [Route("update/{id}")]
-        public IActionResult ShowUpdateForm(int id)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateRating(int id, RatingDto ratingDto)
         {
-            // TODO: get Rating by Id and to model then show to the form
-            return Ok();
+            if (id != ratingDto.Id)
+            {
+                return BadRequest(new { message = "The provided id does not match the id in the request." });
+            }
+
+            try
+            {
+                _logger.LogInformation("Updating Rating");
+                var updatedRating = await _ratingRepository.UpdateRating(id, ratingDto);
+                if (updatedRating == null)
+                {
+                    return NotFound(new { message = "Rating not found with the provided id." });
+                }
+
+                return Ok(new { message = "Rating updated successfully.", updatedRating });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return NotFound(new { message = "An error occurred while updating the Rating." });
+            }
         }
 
         [HttpPost]
-        [Route("update/{id}")]
-        public IActionResult UpdateRating(int id, [FromBody] Rating rating)
+        public async Task<ActionResult<Rating>> PostRating(RatingDto ratingDto)
         {
-            // TODO: check required fields, if valid call service to update Rating and return Rating list
-            return Ok();
+            try
+            {
+                _logger.LogInformation("Creating new Rating successfully.");
+                var rating = await _ratingRepository.PostRating(ratingDto);
+                return CreatedAtAction("GetRating", new { id = rating.Id }, rating);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, new { message = "An error occurred while creating the Rating." });
+            }
         }
 
-        [HttpDelete]
-        [Route("{id}")]
-        public IActionResult DeleteRating(int id)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteRating(int id)
         {
-            // TODO: Find Rating by Id and delete the Rating, return to Rating list
-            return Ok();
+            try
+            {
+                _logger.LogInformation("Deleting Rating");
+                await _ratingRepository.DeleteRating(id);
+                return Ok(new { message = "Rating deleted successfully." });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500, new { message = "An error occurred while deleting the Rating." });
+            }
         }
     }
 }
