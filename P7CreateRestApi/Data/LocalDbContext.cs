@@ -1,7 +1,7 @@
-using Microsoft.EntityFrameworkCore;
 using Dot.Net.WebApi.Domain;
+using Microsoft.EntityFrameworkCore;
 
-namespace Dot.Net.WebApi.Data
+namespace P7CreateRestApi.Data
 {
     public class LocalDbContext : DbContext
     {

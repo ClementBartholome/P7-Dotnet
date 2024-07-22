@@ -1,7 +1,7 @@
-﻿using Dot.Net.WebApi.Data;
-using Dot.Net.WebApi.Domain;
+﻿using Dot.Net.WebApi.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using P7CreateRestApi.Data;
 using P7CreateRestApi.Models.Dto;
 
 
