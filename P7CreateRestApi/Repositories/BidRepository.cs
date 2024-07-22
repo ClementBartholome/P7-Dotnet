@@ -56,18 +56,15 @@ namespace P7CreateRestApi.Repositories
 
             var bidList = await _context.BidLists.FindAsync(id);
 
-            if (bidList != null)
-            {
-                bidList.Account = bidListDto.Account;
-                bidList.BidType = bidListDto.BidType;
-                bidList.BidQuantity = bidListDto.BidQuantity;
+            if (bidList == null) return bidList;
+            
+            bidList.Account = bidListDto.Account;
+            bidList.BidType = bidListDto.BidType;
+            bidList.BidQuantity = bidListDto.BidQuantity;
 
-                _context.Set<BidList>().Update(bidList);
-                await _context.SaveChangesAsync();
-                return bidList;
-            }
-
-            return null;
+            _context.Set<BidList>().Update(bidList);
+            await _context.SaveChangesAsync();
+            return bidList;
         }
         
         public async Task<BidList> PostBidList(BidListDto bidListDto)
@@ -84,16 +81,17 @@ namespace P7CreateRestApi.Repositories
             return bidList;
         }
         
-        public async Task DeleteBidList(int id)
+        public async Task<bool> DeleteBidList(int id)
         {
-            if (!BidListExists(id))
-            {
-                return;
-            }
-
             var bidList = await _context.BidLists.FindAsync(id);
-            if (bidList != null) _context.BidLists.Remove(bidList);
+            if (bidList == null)
+            {
+                return false;
+            }
+            
+            _context.BidLists.Remove(bidList);
             await _context.SaveChangesAsync();
+            return true;
         }
         
         private bool BidListExists(int id)

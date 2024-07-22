@@ -91,14 +91,10 @@ namespace P7CreateRestApi.Controllers
 
                 return Ok(new { message = "BidList updated successfully.", updatedBidList = updatedBidListDto });
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception e)
             {
-                if (!BidListExists(id))
-                {
-                    return NotFound(new { message = "BidList not found with the provided id." });
-                }
-
-                throw;
+                Console.WriteLine(e.Message);
+                return NotFound(new { message = "An error occurred while updating the BidList." });
             }
         }
 
@@ -123,12 +119,17 @@ namespace P7CreateRestApi.Controllers
 
         // DELETE: BidList/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBidList(int id)
+        public async Task<IActionResult> DeleteBid(int id)
         {
             try
             {
                 _logger.LogInformation("Deleting BidList");
-                await _bidListRepository.DeleteBidList(id);
+                var result = await _bidListRepository.DeleteBidList(id);
+                if (!result)
+                {
+                    return NotFound(new { message = "BidList not found with the provided id." });
+                }
+
                 return Ok(new { message = "BidList deleted successfully." });
             }
             catch (Exception e)
@@ -136,11 +137,6 @@ namespace P7CreateRestApi.Controllers
                 Console.WriteLine(e.Message);
                 return StatusCode(500, new { message = "An error occurred while deleting the BidList." });
             }
-        }
-
-        private bool BidListExists(int id)
-        {
-            return (_context.BidLists?.Any(e => e.BidListId == id)).GetValueOrDefault();
         }
     }
 }
