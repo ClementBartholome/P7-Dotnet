@@ -109,7 +109,7 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
-                _logger.LogInformation("Creating new BidList successfully.");
+                _logger.LogInformation("Creating new BidList.");
                 var bidList = await _bidListRepository.PostBidList(bidListDto);
                 return CreatedAtAction("GetBidList", new { id = bidList.BidListId }, bidList);
             }
