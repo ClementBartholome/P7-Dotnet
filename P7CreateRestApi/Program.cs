@@ -17,6 +17,7 @@ builder.Services.AddDbContext<LocalDbContext>(options =>
 
 builder.Services.AddScoped<BidRepository>();
 builder.Services.AddScoped<RatingRepository>();
+builder.Services.AddScoped<RuleRepository>();
 
 var app = builder.Build();
 
