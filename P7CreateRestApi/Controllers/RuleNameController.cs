@@ -1,59 +1,131 @@
 using Microsoft.AspNetCore.Mvc;
-using Dot.Net.WebApi.Domain;
+using P7CreateRestApi.Models.Dto;
+using P7CreateRestApi.Repositories;
+using System;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
-namespace Dot.Net.WebApi.Controllers
+namespace P7CreateRestApi.Controllers
 {
-    [ApiController]
     [Route("[controller]")]
-    public class RuleNameController : ControllerBase
+    [ApiController]
+    public class RuleController : ControllerBase
     {
-        // TODO: Inject RuleName service
+        private readonly RuleRepository _ruleRepository;
+        private readonly ILogger<RuleController> _logger;
 
-        [HttpGet]
-        [Route("list")]
-        public IActionResult Home()
+        public RuleController(RuleRepository ruleRepository, ILogger<RuleController> logger)
         {
-            // TODO: find all RuleName, add to model
-            return Ok();
+            _ruleRepository = ruleRepository;
+            _logger = logger;
         }
 
         [HttpGet]
-        [Route("add")]
-        public IActionResult AddRuleName([FromBody]RuleName trade)
+        public async Task<ActionResult<IEnumerable<RuleDto>>> GetRules()
         {
-            return Ok();
+            _logger.LogInformation("Retrieving Rules");
+            try
+            {
+                return await _ruleRepository.GetRules();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500, new { message = "An error occurred while retrieving the Rules." });
+            }
         }
 
-        [HttpGet]
-        [Route("validate")]
-        public IActionResult Validate([FromBody]RuleName trade)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<RuleDto>> GetRule(int id)
         {
-            // TODO: check data valid and save to db, after saving return RuleName list
-            return Ok();
+            try
+            {
+                _logger.LogInformation("Retrieving Rule");
+                var ruleDto = await _ruleRepository.GetRule(id);
+
+                if (ruleDto == null)
+                {
+                    return NotFound(new { message = "Rule not found with the provided id." });
+                }
+
+                return ruleDto;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500, new { message = "An error occurred while retrieving the Rule." });
+            }
         }
 
-        [HttpGet]
-        [Route("update/{id}")]
-        public IActionResult ShowUpdateForm(int id)
+        [HttpPut("{id}")]
+        public async Task<ActionResult<RuleDto>> UpdateRule(int id, RuleDto ruleDto)
         {
-            // TODO: get RuleName by Id and to model then show to the form
-            return Ok();
+            try
+            {
+                _logger.LogInformation("Updating Rule");
+                var updatedRule = await _ruleRepository.UpdateRule(id, ruleDto);
+
+                if (updatedRule == null)
+                {
+                    return NotFound(new { message = "Rule not found with the provided id." });
+                }
+
+                var updatedRuleDto = new RuleDto
+                {
+                    Id = updatedRule.Id,
+                    Name = updatedRule.Name,
+                    Description = updatedRule.Description,
+                    Json = updatedRule.Json,
+                    Template = updatedRule.Template,
+                    SqlStr = updatedRule.SqlStr,
+                    SqlPart = updatedRule.SqlPart
+                };
+
+                return Ok(new { message = "BidList updated successfully.", updatedBidList = updatedRuleDto });
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return StatusCode(500, new { message = "An error occurred while updating the Rule." });
+            }
         }
 
         [HttpPost]
-        [Route("update/{id}")]
-        public IActionResult UpdateRuleName(int id, [FromBody] RuleName rating)
+        public async Task<ActionResult<RuleDto>> PostRule(RuleDto ruleDto)
         {
-            // TODO: check required fields, if valid call service to update RuleName and return RuleName list
-            return Ok();
+            try
+            {
+                _logger.LogInformation("Creating Rule");
+                var rule = await _ruleRepository.PostRule(ruleDto);
+                return CreatedAtAction("GetRule", new { id = rule.Id }, ruleDto);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500, new { message = "An error occurred while creating the Rule." });
+            }
         }
 
-        [HttpDelete]
-        [Route("{id}")]
-        public IActionResult DeleteRuleName(int id)
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<RuleDto>> DeleteRule(int id)
         {
-            // TODO: Find RuleName by Id and delete the RuleName, return to Rule list
-            return Ok();
+            try
+            {
+                _logger.LogInformation("Deleting Rule");
+                var result = await _ruleRepository.DeleteRule(id);
+
+                if (!result)
+                {
+                    return NotFound(new { message = "Rule not found with the provided id." });
+                }
+                
+                return Ok(new { message = "Rule deleted successfully." });
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500, new { message = "An error occurred while deleting the Rule." });
+            }
         }
     }
 }
