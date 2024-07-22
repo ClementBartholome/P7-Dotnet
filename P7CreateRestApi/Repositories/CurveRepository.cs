@@ -56,13 +56,11 @@ namespace P7CreateRestApi.Repositories
 
             var curvePoint = await _context.CurvePoints.FindAsync(id);
 
-            if (curvePoint != null)
-            {
-                curvePoint.CurveId = curvePointDto.CurveId;
-                curvePoint.Term = curvePointDto.Term;
-                curvePoint.CurvePointValue = curvePointDto.CurvePointValue;
-                await _context.SaveChangesAsync();
-            }
+            if (curvePoint == null) return curvePoint;
+            curvePoint.CurveId = curvePointDto.CurveId;
+            curvePoint.Term = curvePointDto.Term;
+            curvePoint.CurvePointValue = curvePointDto.CurvePointValue;
+            await _context.SaveChangesAsync();
 
             return curvePoint;
         }
