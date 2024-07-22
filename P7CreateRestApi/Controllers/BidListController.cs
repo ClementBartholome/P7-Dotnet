@@ -14,32 +14,52 @@ namespace P7CreateRestApi.Controllers
     {
         private readonly LocalDbContext _context;
         private readonly BidRepository _bidListRepository;
+        private readonly ILogger<BidListController> _logger;
 
-        public BidListController(LocalDbContext context, BidRepository bidListRepository)
+        public BidListController(LocalDbContext context, BidRepository bidListRepository,
+            ILogger<BidListController> logger)
         {
             _context = context;
             _bidListRepository = bidListRepository;
+            _logger = logger;
         }
 
         // GET: BidList
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BidListDto>>> GetBidLists()
         {
-            return await _bidListRepository.GetBidLists();
+            _logger.LogInformation("Retrieving BidLists");
+            try {
+                return await _bidListRepository.GetBidLists();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500, new { message = "An error occurred while retrieving the BidLists." });
+            }
         }
 
         // GET: BidList/5
         [HttpGet("{id}")]
         public async Task<ActionResult<BidListDto>> GetBidList(int id)
         {
-            var bidListDto = await _bidListRepository.GetBidList(id);
-
-            if (bidListDto == null)
+            try
             {
-                return NotFound(new { message = "BidList not found with the provided id." });
-            }
+                _logger.LogInformation("Retrieving BidList");
+                var bidListDto = await _bidListRepository.GetBidList(id);
+                
+                if (bidListDto == null)
+                {
+                    return NotFound(new { message = "BidList not found with the provided id." });
+                }
 
-            return bidListDto;
+                return bidListDto;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500, new { message = "An error occurred while retrieving the BidList." });
+            }
         }
 
         // PUT: BidList/5
@@ -54,7 +74,22 @@ namespace P7CreateRestApi.Controllers
 
             try
             {
-                await _bidListRepository.UpdateBidList(id, bidListDto);
+                _logger.LogInformation("Updating BidList");
+                var updatedBidList = await _bidListRepository.UpdateBidList(id, bidListDto);
+                if (updatedBidList == null)
+                {
+                    return NotFound(new { message = "BidList not found with the provided id." });
+                }
+
+                var updatedBidListDto = new BidListDto
+                {
+                    BidListId = updatedBidList.BidListId,
+                    Account = updatedBidList.Account,
+                    BidType = updatedBidList.BidType,
+                    BidQuantity = updatedBidList.BidQuantity
+                };
+
+                return Ok(new { message = "BidList updated successfully.", updatedBidList = updatedBidListDto });
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -65,8 +100,6 @@ namespace P7CreateRestApi.Controllers
 
                 throw;
             }
-
-            return NoContent();
         }
 
         // POST: BidList
@@ -76,16 +109,17 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
+                _logger.LogInformation("Creating new BidList successfully.");
                 var bidList = await _bidListRepository.PostBidList(bidListDto);
                 return CreatedAtAction("GetBidList", new { id = bidList.BidListId }, bidList);
             }
             catch (Exception ex)
-            { 
+            {
                 Console.WriteLine(ex.Message);
                 return StatusCode(500, new { message = "An error occurred while creating the BidList." });
             }
         }
-        
+
 
         // DELETE: BidList/5
         [HttpDelete("{id}")]
@@ -93,8 +127,9 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
+                _logger.LogInformation("Deleting BidList");
                 await _bidListRepository.DeleteBidList(id);
-                return NoContent();
+                return Ok(new { message = "BidList deleted successfully." });
             }
             catch (Exception e)
             {
