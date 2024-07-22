@@ -1,85 +1,120 @@
-using Dot.Net.WebApi.Domain;
-using Dot.Net.WebApi.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Dot.Net.WebApi.Domain;
+using P7CreateRestApi.Models.Dto;
+using P7CreateRestApi.Repositories;
 
-namespace Dot.Net.WebApi.Controllers
+namespace P7CreateRestApi.Controllers
 {
-    [ApiController]
     [Route("[controller]")]
+    [ApiController]
     public class UserController : ControllerBase
     {
-        private UserRepository _userRepository;
+        private readonly UserRepository _userRepository;
+        private readonly ILogger<UserController> _logger;
 
-        public UserController(UserRepository userRepository)
+        public UserController(UserRepository userRepository, ILogger<UserController> logger)
         {
             _userRepository = userRepository;
+            _logger = logger;
         }
 
         [HttpGet]
-        [Route("list")]
-        public IActionResult Home()
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
         {
-            return Ok();
-        }
-
-        [HttpGet]
-        [Route("add")]
-        public IActionResult AddUser([FromBody]User user)
-        {
-            return Ok();
-        }
-
-        [HttpGet]
-        [Route("validate")]
-        public IActionResult Validate([FromBody]User user)
-        {
-            if (!ModelState.IsValid)
+            _logger.LogInformation("Retrieving Users");
+            try
             {
-                return BadRequest();
+                return await _userRepository.GetUsers();
             }
-           
-           _userRepository.Add(user);
-
-            return Ok();
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500, new { message = "An error occurred while retrieving the Users." });
+            }
         }
 
-        [HttpGet]
-        [Route("update/{id}")]
-        public IActionResult ShowUpdateForm(int id)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<UserDto>> GetUser(int id)
         {
-            User user = _userRepository.FindById(id);
-            
-            if (user == null)
-                throw new ArgumentException("Invalid user Id:" + id);
+            try
+            {
+                _logger.LogInformation("Retrieving User");
+                var userDto = await _userRepository.GetUser(id);
 
-            return Ok();
+                if (userDto == null)
+                {
+                    return NotFound(new { message = "User not found with the provided id." });
+                }
+
+                return userDto;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500, new { message = "An error occurred while retrieving the User." });
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(int id, UserDto userDto)
+        {
+            if (id != userDto.Id)
+            {
+                return BadRequest(new { message = "The provided id does not match the id in the request." });
+            }
+
+            try
+            {
+                _logger.LogInformation("Updating User");
+                var updatedUser = await _userRepository.UpdateUser(id, userDto);
+                if (updatedUser == null)
+                {
+                    return NotFound(new { message = "User not found with the provided id." });
+                }
+
+                return Ok(new { message = "User updated successfully.", updatedUser });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return NotFound(new { message = "An error occurred while updating the User." });
+            }
         }
 
         [HttpPost]
-        [Route("update/{id}")]
-        public IActionResult UpdateUser(int id, [FromBody] User user)
+        public async Task<ActionResult<User>> PostUser(UserDto userDto)
         {
-            // TODO: check required fields, if valid call service to update Trade and return Trade list
-            return Ok();
+            try
+            {
+                _logger.LogInformation("Creating new User successfully.");
+                var user = await _userRepository.PostUser(userDto);
+                return CreatedAtAction("GetUser", new { id = user.Id }, user);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, new { message = "An error occurred while creating the User." });
+            }
         }
 
-        [HttpDelete]
-        [Route("{id}")]
-        public IActionResult DeleteUser(int id)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
         {
-            User user = _userRepository.FindById(id);
-            
-            if (user == null)
-                throw new ArgumentException("Invalid user Id:" + id);
-
-            return Ok();
-        }
-
-        [HttpGet]
-        [Route("/secure/article-details")]
-        public async Task<ActionResult<List<User>>> GetAllUserArticles()
-        {
-            return Ok();
+            try
+            {
+                _logger.LogInformation("Deleting User");
+                var result = await _userRepository.DeleteUser(id);
+                if (!result)
+                {
+                    return NotFound(new { message = "User not found with the provided id." });
+                }
+                return Ok(new { message = "User deleted successfully." });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500, new { message = "An error occurred while deleting the User." });
+            }
         }
     }
 }

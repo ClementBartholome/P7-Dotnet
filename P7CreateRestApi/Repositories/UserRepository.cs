@@ -1,36 +1,98 @@
 using Dot.Net.WebApi.Data;
 using Dot.Net.WebApi.Domain;
 using Microsoft.EntityFrameworkCore;
+using P7CreateRestApi.Models.Dto;
+using Microsoft.AspNetCore.Mvc;
 
-namespace Dot.Net.WebApi.Repositories
+namespace P7CreateRestApi.Repositories
 {
     public class UserRepository
     {
-        public LocalDbContext DbContext { get; }
+        private readonly LocalDbContext _context;
 
-        public UserRepository(LocalDbContext dbContext)
+        public UserRepository(LocalDbContext context)
         {
-            DbContext = dbContext;
+            _context = context;
         }
 
-        public User FindByUserName(string userName)
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
         {
-            return DbContext.Users.Where(user => user.UserName == userName)
-                                  .FirstOrDefault();
+            return await _context.Users
+                .Select(user => new UserDto
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Password = user.Password,
+                    FullName = user.FullName,
+                    Role = user.Role
+                })
+                .ToListAsync();
         }
 
-        public async Task<List<User>> FindAll()
+        public async Task<UserDto?> GetUser(int id)
         {
-            return await DbContext.Users.ToListAsync();
+            var user = await _context.Users.FindAsync(id);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            return new UserDto
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                Password = user.Password, 
+                FullName = user.FullName,
+                Role = user.Role
+            };
         }
 
-        public void Add(User user)
+        public async Task<User?> UpdateUser(int id, UserDto userDto)
         {
+            var user = await _context.Users.FindAsync(id);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            user.UserName = userDto.UserName;
+            user.Password = userDto.Password; 
+            user.FullName = userDto.FullName;
+            user.Role = userDto.Role;
+
+            _context.Set<User>().Update(user);
+            await _context.SaveChangesAsync();
+            return user;
         }
 
-        public User FindById(int id)
+        public async Task<User> PostUser(UserDto userDto)
         {
-            return null;
+            var user = new User
+            {
+                UserName = userDto.UserName,
+                Password = userDto.Password, 
+                FullName = userDto.FullName,
+                Role = userDto.Role
+            };
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+            return user;
+        }
+
+        public async Task<bool> DeleteUser(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return false;
+            }
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }
