@@ -20,6 +20,7 @@ builder.Services.AddScoped<CurveRepository>();
 builder.Services.AddScoped<RatingRepository>();
 builder.Services.AddScoped<RuleRepository>();
 builder.Services.AddScoped<TradeRepository>();
+builder.Services.AddScoped<UserRepository>();
 
 var app = builder.Build();
 
