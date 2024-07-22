@@ -84,19 +84,17 @@ namespace P7CreateRestApi.Repositories
             return rating;
         }
 
-        public async Task DeleteRating(int id)
+        public async Task<bool> DeleteRating(int id)
         {
-            if (!RatingExists(id))
+            var rating = await _context.Ratings.FindAsync(id);
+            if (rating == null)
             {
-                return;
+                return false;
             }
 
-            var rating = await _context.Ratings.FindAsync(id);
-            if (rating != null)
-            {
-                _context.Ratings.Remove(rating);
-                await _context.SaveChangesAsync();
-            }
+            _context.Ratings.Remove(rating);
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         private bool RatingExists(int id)

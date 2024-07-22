@@ -104,8 +104,13 @@ namespace P7CreateRestApi.Controllers
         {
             try
             {
-                _logger.LogInformation("Deleting Rating");
-                await _ratingRepository.DeleteRating(id);
+                _logger.LogInformation("Attempting to delete Rating");
+                var result = await _ratingRepository.DeleteRating(id);
+                if (!result)
+                {
+                    return NotFound(new { message = "Rating not found with the provided id." });
+                }
+
                 return Ok(new { message = "Rating deleted successfully." });
             }
             catch (Exception e)
