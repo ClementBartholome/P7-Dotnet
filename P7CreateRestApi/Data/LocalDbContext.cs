@@ -1,20 +1,18 @@
 using Dot.Net.WebApi.Domain;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using P7CreateRestApi.Domain;
 
 namespace P7CreateRestApi.Data
 {
-    public class LocalDbContext : DbContext
+    public class LocalDbContext : IdentityDbContext<User>
     {
-        public LocalDbContext(DbContextOptions<LocalDbContext> options) : base(options)
+        public LocalDbContext(DbContextOptions<LocalDbContext> options)
+            : base(options)
         {
         }
 
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder);
-        }
-
-        public DbSet<User> Users { get; set; }
+        public new DbSet<User> Users { get; set; }
         public DbSet<BidList> BidLists { get; set; }
         public DbSet<CurvePoint> CurvePoints { get; set; }
         public DbSet<Rating> Ratings { get; set; }

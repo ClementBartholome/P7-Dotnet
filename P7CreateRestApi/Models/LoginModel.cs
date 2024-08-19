@@ -1,7 +1,7 @@
-﻿namespace P7CreateRestApi.Models
+﻿namespace P7CreateRestApi.Domain;
+
+public class LoginModel
 {
-    public class LoginModel
-    {
-        // TODO: implement properties needeed for login model.
-    }
+    public string Email { get; set; }
+    public string Password { get; set; }
 }

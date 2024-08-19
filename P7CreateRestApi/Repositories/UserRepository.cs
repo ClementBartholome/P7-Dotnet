@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using P7CreateRestApi.Models.Dto;
 using Microsoft.AspNetCore.Mvc;
 using P7CreateRestApi.Data;
+using P7CreateRestApi.Domain;
 
 namespace P7CreateRestApi.Repositories
 {
@@ -22,9 +23,7 @@ namespace P7CreateRestApi.Repositories
                 {
                     Id = user.Id,
                     UserName = user.UserName,
-                    Password = user.Password,
                     FullName = user.FullName,
-                    Role = user.Role
                 })
                 .ToListAsync();
         }
@@ -42,9 +41,7 @@ namespace P7CreateRestApi.Repositories
             {
                 Id = user.Id,
                 UserName = user.UserName,
-                Password = user.Password, 
                 FullName = user.FullName,
-                Role = user.Role
             };
         }
 
@@ -58,9 +55,8 @@ namespace P7CreateRestApi.Repositories
             }
 
             user.UserName = userDto.UserName;
-            user.Password = userDto.Password; 
+            user.PasswordHash = userDto.Password; 
             user.FullName = userDto.FullName;
-            user.Role = userDto.Role;
 
             _context.Set<User>().Update(user);
             await _context.SaveChangesAsync();
@@ -72,9 +68,8 @@ namespace P7CreateRestApi.Repositories
             var user = new User
             {
                 UserName = userDto.UserName,
-                Password = userDto.Password, 
+                PasswordHash = userDto.Password, 
                 FullName = userDto.FullName,
-                Role = userDto.Role
             };
 
             _context.Users.Add(user);

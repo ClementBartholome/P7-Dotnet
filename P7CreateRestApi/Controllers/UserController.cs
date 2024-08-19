@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Dot.Net.WebApi.Domain;
+using P7CreateRestApi.Domain;
 using P7CreateRestApi.Models.Dto;
 using P7CreateRestApi.Repositories;
 
