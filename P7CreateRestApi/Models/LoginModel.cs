@@ -1,4 +1,4 @@
-﻿namespace P7CreateRestApi.Domain;
+﻿namespace P7CreateRestApi.Models;
 
 public class LoginModel
 {
