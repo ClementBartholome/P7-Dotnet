@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using P7CreateRestApi.Domain;
 using P7CreateRestApi.Models;
@@ -8,6 +9,7 @@ namespace P7CreateRestApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class AuthController : ControllerBase
 {
     private readonly UserManager<User> _userManager;
@@ -24,6 +26,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
+    [AllowAnonymous]
     public async Task<IActionResult> Register(RegisterModel model)
     {
         _logger.LogInformation("Registering User");
@@ -39,6 +42,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
+    [AllowAnonymous]
     public async Task<IActionResult> Login(LoginModel model)
     {
         _logger.LogInformation("Login method called with email: {Email}", model.Email);
@@ -48,7 +52,7 @@ public class AuthController : ControllerBase
             var user = await _userManager.FindByEmailAsync(model.Email);
             var token = _jwtService.GenerateJwtToken(user);
             _logger.LogInformation("User logged in successfully with email: {Email}", model.Email);
-            return Ok(new { token });
+            return Ok(token);
         }
         _logger.LogWarning("Login failed for email: {Email}", model.Email);
         return Unauthorized();
