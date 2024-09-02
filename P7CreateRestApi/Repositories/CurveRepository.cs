@@ -92,7 +92,7 @@ namespace P7CreateRestApi.Repositories
             return true;
         }
         
-        private bool CurveExists(int id)
+        public bool CurveExists(int id)
         {
             return _context.CurvePoints.Any(e => e.Id == id);
         }

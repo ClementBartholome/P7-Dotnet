@@ -2,12 +2,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using P7CreateRestApi.Data;
+using P7CreateRestApi.Interfaces;
 using P7CreateRestApi.Models.Dto;
 
 
 namespace P7CreateRestApi.Repositories
 {
-    public class BidRepository
+    public class BidRepository : IBidRepository
     {
         private readonly LocalDbContext _context;
 
@@ -96,9 +97,10 @@ namespace P7CreateRestApi.Repositories
             await _context.SaveChangesAsync();
         }
         
-        private bool BidListExists(int id)
+        public bool BidListExists(int id)
         {
             return _context.BidLists.Any(e => e.BidListId == id);
         }
     }
+
 }

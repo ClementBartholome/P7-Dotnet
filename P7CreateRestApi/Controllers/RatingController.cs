@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Dot.Net.WebApi.Domain;
+using Microsoft.AspNetCore.Authorization;
 using P7CreateRestApi.Models.Dto;
 using P7CreateRestApi.Repositories;
 
@@ -20,6 +21,7 @@ namespace P7CreateRestApi.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<RatingDto>>> GetRatings()
         {
             _logger.LogInformation("Retrieving Ratings");
@@ -35,6 +37,7 @@ namespace P7CreateRestApi.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<RatingDto>> GetRating(int id)
         {
             try
@@ -57,6 +60,7 @@ namespace P7CreateRestApi.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateRating(int id, RatingDto ratingDto)
         {
             if (id != ratingDto.Id)
@@ -83,6 +87,7 @@ namespace P7CreateRestApi.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Rating>> PostRating(RatingDto ratingDto)
         {
             try
@@ -99,6 +104,7 @@ namespace P7CreateRestApi.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteRating(int id)
         {
             try

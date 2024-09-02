@@ -4,7 +4,7 @@ namespace P7CreateRestApi.Models.Dto;
 
 public class UserDto
 {
-    public int Id { get; set; }
+    public string Id { get; set; }
 
     [Required]
     [StringLength(50, ErrorMessage = "UserName cannot exceed 50 characters.")]
@@ -19,5 +19,5 @@ public class UserDto
 
     [Required]
     [StringLength(50, ErrorMessage = "Role cannot exceed 50 characters.")]
-    public string Role { get; set; }
+    public IList<string> Roles { get; set; }
 }

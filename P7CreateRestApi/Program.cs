@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -8,49 +9,53 @@ using P7CreateRestApi.Data;
 using P7CreateRestApi.Domain;
 using P7CreateRestApi.Repositories;
 using P7CreateRestApi.Services;
+using Serilog;
+using Serilog.Events;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure logging
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
-builder.Logging.AddFile("Logs/P7CreateRestApi-{Date}.txt");
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/P7CreateRestApi-.log", rollingInterval: RollingInterval.Month)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<LocalDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<LocalDbContext>();
+
+builder.Services.AddIdentityCore<User>()
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<LocalDbContext>()
+    .AddDefaultTokenProviders();
 
 builder.Configuration.AddUserSecrets<Program>();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
-        // Paramètres utilisateur.
-        options.User.RequireUniqueEmail = true;
-        options.User.AllowedUserNameCharacters =
-            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@";
-
-        // Paramètres des mots de passe.
-        options.Password.RequireDigit = true;
-        options.Password.RequireLowercase = true;
-        options.Password.RequireNonAlphanumeric = true;
-        options.Password.RequireUppercase = true;
-        options.Password.RequiredLength = 8;
-
-        // Paramètres de verrouillage.
-        options.Lockout.MaxFailedAccessAttempts = 3;
-        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
+    options.User.RequireUniqueEmail = true;
+    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@";
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequiredLength = 8;
+    options.Lockout.MaxFailedAccessAttempts = 3;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
 });
-
-
 
 builder.Services.AddScoped<BidRepository>();
 builder.Services.AddScoped<CurveRepository>();
@@ -60,7 +65,11 @@ builder.Services.AddScoped<TradeRepository>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<JwtService>();
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
+});
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -96,10 +105,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// Add Swagger configuration for JWT
 builder.Services.AddSwaggerGen(option =>
 {
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    
     option.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo API", Version = "v1" });
+    option.IncludeXmlComments(xmlPath);
     option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -127,7 +139,20 @@ builder.Services.AddSwaggerGen(option =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var roles = new[] { "Admin", "User" };
+
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
+    }
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

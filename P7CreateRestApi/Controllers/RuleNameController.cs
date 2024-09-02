@@ -3,6 +3,7 @@ using P7CreateRestApi.Models.Dto;
 using P7CreateRestApi.Repositories;
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 namespace P7CreateRestApi.Controllers
@@ -21,6 +22,7 @@ namespace P7CreateRestApi.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<RuleDto>>> GetRules()
         {
             _logger.LogInformation("Retrieving Rules");
@@ -36,6 +38,7 @@ namespace P7CreateRestApi.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<RuleDto>> GetRule(int id)
         {
             try
@@ -58,6 +61,7 @@ namespace P7CreateRestApi.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<RuleDto>> UpdateRule(int id, RuleDto ruleDto)
         {
             try
@@ -90,6 +94,7 @@ namespace P7CreateRestApi.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<RuleDto>> PostRule(RuleDto ruleDto)
         {
             try
@@ -106,6 +111,7 @@ namespace P7CreateRestApi.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<RuleDto>> DeleteRule(int id)
         {
             try

@@ -4,6 +4,7 @@ using P7CreateRestApi.Repositories;
 using System;
 using System.Threading.Tasks;
 using Dot.Net.WebApi.Domain;
+using Microsoft.AspNetCore.Authorization;
 
 namespace P7CreateRestApi.Controllers
 {
@@ -21,6 +22,7 @@ namespace P7CreateRestApi.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<TradeDto>>> GetTrades()
         {
             _logger.LogInformation("Retrieving Trades");
@@ -36,6 +38,7 @@ namespace P7CreateRestApi.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<TradeDto>> GetTrade(int id)
         {
             try
@@ -58,6 +61,7 @@ namespace P7CreateRestApi.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateTrade(int id, TradeDto tradeDto)
         {
             if (id != tradeDto.TradeId)
@@ -84,6 +88,7 @@ namespace P7CreateRestApi.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Trade>> PostTrade(TradeDto tradeDto)
         {
             try
@@ -100,6 +105,7 @@ namespace P7CreateRestApi.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteTrade(int id)
         {
             try
