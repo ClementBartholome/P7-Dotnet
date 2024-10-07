@@ -1,3 +1,23 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using P7CreateRestApi.Domain;
+using P7CreateRestApi.Models.Dto;
+
+namespace P7CreateRestApi.Interfaces;
+
+public interface IUserRepository
+{
+    Task<ActionResult<IEnumerable<User>>> GetUsers();
+    Task<User?> GetUser(string id);
+    Task<User?> UpdateUser(string id, UserDto userDto);
+    Task<bool> DeleteUser(string id);
+    Task<(bool Success, List<string> AlreadyInRoles)> AddRolesToUser(string id, List<string> roles);
+    Task<bool> RemoveRoleFromUser(string id, string role);
+    Task<bool> UpdateRoleForUser(string userId, string role);
+    Task<bool> CreateRole(string roleName);
+    Task<bool> DeleteRole(string roleName);
+}
+
+/*
 using Dot.Net.WebApi.Domain;
 using Microsoft.EntityFrameworkCore;
 using P7CreateRestApi.Models.Dto;
@@ -20,19 +40,40 @@ namespace P7CreateRestApi.Repositories
             _userManager = userManager;
         }
 
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
         {
-            return await _context.Users.ToListAsync();
+            return await _context.Users
+                .Select(user => new UserDto
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    FullName = user.FullName,
+                    Roles = _userManager.GetRolesAsync(user).Result,
+                })
+                .ToListAsync();
         }
 
-        public async Task<User?> GetUser(string id)
+        public async Task<UserDto?> GetUser(string id)
         {
-            return await _context.Users.FindAsync(id);
+            var user = await _context.Users.FindAsync(id);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            return new UserDto
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                FullName = user.FullName,
+                Roles = _userManager.GetRolesAsync(user).Result,
+            };
         }
 
         public async Task<User?> UpdateUser(string id, UserDto userDto)
         {
-            var user = await _userManager.FindByIdAsync(id);
+            var user = await _context.Users.FindAsync(id);
 
             if (user == null)
             {
@@ -40,19 +81,25 @@ namespace P7CreateRestApi.Repositories
             }
 
             user.UserName = userDto.UserName;
+            user.PasswordHash = userDto.Password;
             user.FullName = userDto.FullName;
 
-            if (!string.IsNullOrEmpty(userDto.Password))
-            {
-                user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, userDto.Password);
-            }
+            _context.Set<User>().Update(user);
+            await _context.SaveChangesAsync();
+            return user;
+        }
 
-            var result = await _userManager.UpdateAsync(user);
-            if (!result.Succeeded)
+        public async Task<User> PostUser(UserDto userDto)
+        {
+            var user = new User
             {
-                return null;
-            }
+                UserName = userDto.UserName,
+                PasswordHash = userDto.Password,
+                FullName = userDto.FullName,
+            };
 
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
             return user;
         }
 
@@ -64,8 +111,9 @@ namespace P7CreateRestApi.Repositories
                 return false;
             }
 
-            var result = _userManager.DeleteAsync(user);
-            return result.Result.Succeeded;
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task<(bool Success, List<string> AlreadyInRoles)> AddRolesToUser(string id, List<string> roles)
@@ -166,3 +214,4 @@ namespace P7CreateRestApi.Repositories
         }
     }
 }
+*/
