@@ -18,7 +18,6 @@ public class RatingDto
     [StringLength(50, ErrorMessage = "FitchRating cannot exceed 50 characters.")]
     public string FitchRating { get; set; }
 
-    [Required]
     [Range(0, byte.MaxValue, ErrorMessage = "OrderNumber must be a non-negative number.")]
     public byte? OrderNumber { get; set; }
 }

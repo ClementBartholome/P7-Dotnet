@@ -14,7 +14,6 @@ public class BidListDto
     [StringLength(50, ErrorMessage = "BidType cannot exceed 50 characters.")]
     public string BidType { get; set; }
 
-    [Required]
     [Range(0, double.MaxValue, ErrorMessage = "BidQuantity must be a non-negative number.")]
     public double? BidQuantity { get; set; }
 }
