@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Dot.Net.WebApi.Domain;
 using Microsoft.AspNetCore.Authorization;
 using P7CreateRestApi.Domain;
+using P7CreateRestApi.Interfaces;
 using P7CreateRestApi.Models.Dto;
 using P7CreateRestApi.Repositories;
 
@@ -12,10 +13,10 @@ namespace P7CreateRestApi.Controllers
     [Authorize(Roles = "Admin")]
     public class UserController : ControllerBase
     {
-        private readonly UserRepository _userRepository;
+        private readonly IUserRepository _userRepository;
         private readonly ILogger<UserController> _logger;
 
-        public UserController(UserRepository userRepository, ILogger<UserController> logger)
+        public UserController(IUserRepository userRepository, ILogger<UserController> logger)
         {
             _userRepository = userRepository;
             _logger = logger;
@@ -30,7 +31,8 @@ namespace P7CreateRestApi.Controllers
             _logger.LogInformation("Retrieving Users");
             try
             {
-                return await _userRepository.GetUsers();
+                var users = await _userRepository.GetUsers();
+                return Ok(users);
             }
             catch (Exception e)
             {
@@ -56,7 +58,7 @@ namespace P7CreateRestApi.Controllers
                     return NotFound(new { message = "User not found with the provided id." });
                 }
 
-                return userDto;
+                return Ok(userDto);
             }
             catch (Exception e)
             {
@@ -93,26 +95,6 @@ namespace P7CreateRestApi.Controllers
             {
                 Console.WriteLine(e.Message);
                 return NotFound(new { message = "An error occurred while updating the User." });
-            }
-        }
-
-        /// <summary>
-        /// Creates a new user.
-        /// </summary>
-        /// <param name="userDto">The user data to create.</param>
-        [HttpPost]
-        public async Task<ActionResult<User>> PostUser(UserDto userDto)
-        {
-            try
-            {
-                _logger.LogInformation("Creating new User successfully.");
-                var user = await _userRepository.PostUser(userDto);
-                return CreatedAtAction("GetUser", new { id = user.Id }, user);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return StatusCode(500, new { message = "An error occurred while creating the User." });
             }
         }
 

@@ -27,7 +27,8 @@ namespace P7CreateRestApi.Controllers
             _logger.LogInformation("Retrieving Ratings");
             try
             {
-                return await _ratingRepository.GetRatings();
+                var ratings = _ratingRepository.GetRatings();
+                return Ok(ratings);
             }
             catch (Exception e)
             {
@@ -50,7 +51,7 @@ namespace P7CreateRestApi.Controllers
                     return NotFound(new { message = "Rating not found with the provided id." });
                 }
 
-                return ratingDto;
+                return Ok(ratingDto);
             }
             catch (Exception e)
             {

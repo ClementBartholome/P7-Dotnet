@@ -28,7 +28,8 @@ namespace P7CreateRestApi.Controllers
             _logger.LogInformation("Retrieving Trades");
             try
             {
-                return await _tradeRepository.GetTrades();
+                var trades = await _tradeRepository.GetTrades();
+                return Ok(trades);
             }
             catch (Exception e)
             {
@@ -51,7 +52,7 @@ namespace P7CreateRestApi.Controllers
                     return NotFound(new { message = "Trade not found with the provided id." });
                 }
 
-                return tradeDto;
+                return Ok(tradeDto);
             }
             catch (Exception e)
             {

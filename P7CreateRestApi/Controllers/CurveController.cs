@@ -32,7 +32,7 @@ namespace P7CreateRestApi.Controllers
             {
                 var curves = await _curveRepository.GetCurves();
                 _logger.LogInformation("Successfully retrieved Curves");
-                return curves;
+                return Ok(curves);
             }
             catch (Exception e)
             {
@@ -58,7 +58,7 @@ namespace P7CreateRestApi.Controllers
                 }
 
                 _logger.LogInformation("Successfully retrieved Curve with id: {Id}", id);
-                return curvePointDto;
+                return Ok(curvePointDto);
             }
             catch (Exception e)
             {
