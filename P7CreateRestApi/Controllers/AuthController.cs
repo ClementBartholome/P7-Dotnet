@@ -34,6 +34,7 @@ public class AuthController : ControllerBase
         var result = await _userManager.CreateAsync(user, model.Password);
         if (result.Succeeded)
         {
+            await _userManager.AddToRoleAsync(user, "User");
             _logger.LogInformation("User registered successfully with email: {Email}", model.Email);
             return Ok(new { message = "User registered successfully" });
         }
