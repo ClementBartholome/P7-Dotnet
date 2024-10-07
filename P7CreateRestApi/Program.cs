@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using P7CreateRestApi.Data;
 using P7CreateRestApi.Domain;
+using P7CreateRestApi.Interfaces;
 using P7CreateRestApi.Repositories;
 using P7CreateRestApi.Services;
 using Serilog;
@@ -57,12 +58,12 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
 });
 
-builder.Services.AddScoped<BidRepository>();
+builder.Services.AddScoped<IBidRepository, BidRepository>();
 builder.Services.AddScoped<CurveRepository>();
 builder.Services.AddScoped<RatingRepository>();
 builder.Services.AddScoped<RuleRepository>();
 builder.Services.AddScoped<TradeRepository>();
-builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<JwtService>();
 
 builder.Services.AddAuthorization(options =>
@@ -167,3 +168,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }
