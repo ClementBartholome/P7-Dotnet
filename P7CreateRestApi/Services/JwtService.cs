@@ -8,7 +8,7 @@ using P7CreateRestApi.Domain;
 namespace P7CreateRestApi.Services
 {
 
-    public class JwtService
+    public class JwtService : IJwtService
     {
         private readonly IConfiguration _configuration;
         private readonly UserManager<User> _userManager;
