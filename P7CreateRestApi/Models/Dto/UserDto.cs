@@ -11,7 +11,7 @@ public class UserDto
     public string UserName { get; set; }
 
     [Required]
-    [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be between 6 and 100 characters.")]
+    [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be between 8 and 100 characters.")]
     public string Password { get; set; }
 
     [StringLength(100, ErrorMessage = "FullName cannot exceed 100 characters.")]
