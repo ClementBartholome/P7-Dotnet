@@ -60,9 +60,9 @@ builder.Services.Configure<IdentityOptions>(options =>
 
 builder.Services.AddScoped<IBidRepository, BidRepository>();
 builder.Services.AddScoped<ICurveRepository, CurveRepository>();
-builder.Services.AddScoped<RatingRepository>();
-builder.Services.AddScoped<RuleRepository>();
-builder.Services.AddScoped<TradeRepository>();
+builder.Services.AddScoped<IRatingRepository, RatingRepository>();
+builder.Services.AddScoped<IRuleRepository, RuleRepository>();
+builder.Services.AddScoped<ITradeRepository, TradeRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 
