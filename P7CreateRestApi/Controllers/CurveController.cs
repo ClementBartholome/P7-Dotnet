@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Dot.Net.WebApi.Domain;
 using Microsoft.AspNetCore.Authorization;
 using P7CreateRestApi.Data;
+using P7CreateRestApi.Interfaces;
 using P7CreateRestApi.Models.Dto;
 using P7CreateRestApi.Repositories;
 
@@ -12,10 +13,10 @@ namespace P7CreateRestApi.Controllers
     [ApiController]
     public class CurveController : ControllerBase
     {
-        private readonly CurveRepository _curveRepository;
+        private readonly ICurveRepository _curveRepository;
         private readonly ILogger<CurveController> _logger;
 
-        public CurveController(CurveRepository curveRepository,
+        public CurveController(ICurveRepository curveRepository,
             ILogger<CurveController> logger)
         {
             _curveRepository = curveRepository;
@@ -71,24 +72,20 @@ namespace P7CreateRestApi.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCurve(int id, CurvePointDto curvePointDto)
         {
-            if (id != curvePointDto.Id)
-            {
-                _logger.LogWarning("The provided id does not match the id in the request. Provided id: {Id}, Request id: {RequestId}", id, curvePointDto.Id);
-                return BadRequest(new { message = "The provided id does not match the id in the request." });
-            }
-
-            if (!CurveExists(id))
-            {
-                _logger.LogWarning("CurvePoint not found with id: {Id}", id);
-                return NotFound(new { message = "CurvePoint not found with the provided id." });
-            }
-
             _logger.LogInformation("Updating CurvePoint with id: {Id}", id);
+            
             try
             {
-                var updatedCurvePoint = await _curveRepository.UpdateCurve(id, curvePointDto);
+                var result = await _curveRepository.UpdateCurve(id, curvePointDto);
+
+                if (result == null)
+                {
+                    _logger.LogWarning("CurvePoint not found with id: {Id}", id);
+                    return NotFound(new { message = "CurvePoint not found with the provided id." });
+                }
+
                 _logger.LogInformation("Successfully updated CurvePoint with id: {Id}", id);
-                return Ok(new { message = "CurvePoint updated successfully.", updatedCurvePoint });
+                return Ok(result);
             }
             catch (Exception e)
             {
@@ -101,23 +98,16 @@ namespace P7CreateRestApi.Controllers
         [HttpPost]
         public async Task<ActionResult<CurvePoint>> PostCurve(CurvePointDto curvePointDto)
         {
-            _logger.LogInformation("Creating new CurvePoint");
-
-            if (CurveExists(curvePointDto.Id))
-            {
-                _logger.LogWarning("CurvePoint with id: {Id} already exists.", curvePointDto.Id);
-                return Conflict(new { message = "A CurvePoint with the provided id already exists." });
-            }
-
+            _logger.LogInformation("Creating CurvePoint");
             try
             {
-                var curvePoint = await _curveRepository.PostCurve(curvePointDto);
-                _logger.LogInformation("Successfully created new CurvePoint with id: {Id}", curvePoint.Id);
-                return CreatedAtAction("GetCurve", new { id = curvePoint.Id }, curvePoint);
+                var result = await _curveRepository.PostCurve(curvePointDto);
+                _logger.LogInformation("Successfully created CurvePoint");
+                return CreatedAtAction("GetCurve", new { id = result.Id }, result);
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                _logger.LogError("An error occurred while creating the CurvePoint: {Message}", ex.Message);
+                _logger.LogError("An error occurred while creating the CurvePoint: {Message}", e.Message);
                 return StatusCode(500, new { message = "An error occurred while creating the CurvePoint." });
             }
         }
@@ -126,16 +116,17 @@ namespace P7CreateRestApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCurve(int id)
         {
-            if (!CurveExists(id))
-            {
-                _logger.LogWarning("CurvePoint not found with id: {Id}", id);
-                return NotFound(new { message = "CurvePoint not found with the provided id." });
-            }
-
             _logger.LogInformation("Deleting CurvePoint with id: {Id}", id);
             try
             {
                 var result = await _curveRepository.DeleteCurve(id);
+
+                if (!result)
+                {
+                    _logger.LogWarning("CurvePoint not found with id: {Id}", id);
+                    return NotFound(new { message = "CurvePoint not found with the provided id." });
+                }
+
                 _logger.LogInformation("Successfully deleted CurvePoint with id: {Id}", id);
                 return Ok(new { message = "CurvePoint deleted successfully." });
             }
@@ -144,11 +135,6 @@ namespace P7CreateRestApi.Controllers
                 _logger.LogError("An error occurred while deleting the CurvePoint with id {Id}: {Message}", id, e.Message);
                 return StatusCode(500, new { message = "An error occurred while deleting the CurvePoint." });
             }
-        }
-        
-        private bool CurveExists(int id)
-        {
-            return _curveRepository.CurveExists(id);
         }
     }
 }

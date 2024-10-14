@@ -70,6 +70,11 @@ namespace P7CreateRestApi.Repositories
 
         public async Task<(bool Success, List<string> AlreadyInRoles)> AddRolesToUser(string id, List<string> roles)
         {
+            if (roles == null || roles.Count == 0)
+            {
+                throw new ArgumentException("Roles list cannot be null or empty", nameof(roles));
+            }
+
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
             {

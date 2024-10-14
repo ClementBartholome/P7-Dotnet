@@ -6,7 +6,7 @@ using P7CreateRestApi.Models.Dto;
 
 namespace P7CreateRestApi.Repositories
 {
-    public class RatingRepository
+    public class RatingRepository : IRatingRepository
     {
         private readonly LocalDbContext _context;
 
@@ -57,9 +57,8 @@ namespace P7CreateRestApi.Repositories
 
             var rating = await _context.Ratings.FindAsync(id);
 
-            if (rating == null) return null;
             
-            rating.MoodysRating = ratingDto.MoodysRating;
+            rating!.MoodysRating = ratingDto.MoodysRating;
             rating.SandPRating = ratingDto.SandPRating;
             rating.FitchRating = ratingDto.FitchRating;
             rating.OrderNumber = ratingDto.OrderNumber;
@@ -97,7 +96,7 @@ namespace P7CreateRestApi.Repositories
             return true;
         }
 
-        private bool RatingExists(int id)
+        public bool RatingExists(int id)
         {
             return _context.Ratings.Any(e => e.Id == id);
         }

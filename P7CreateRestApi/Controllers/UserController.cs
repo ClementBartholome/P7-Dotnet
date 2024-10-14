@@ -26,7 +26,7 @@ namespace P7CreateRestApi.Controllers
         /// Retrieves all users.
         /// </summary>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
             _logger.LogInformation("Retrieving Users");
             try
@@ -94,7 +94,7 @@ namespace P7CreateRestApi.Controllers
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                return NotFound(new { message = "An error occurred while updating the User." });
+                return StatusCode(500, new { message = "An error occurred while updating the User." });
             }
         }
 
@@ -133,14 +133,10 @@ namespace P7CreateRestApi.Controllers
             try
             {
                 _logger.LogInformation("Adding Roles to User");
-                var (success, alreadyInRoles) = await _userRepository.AddRolesToUser(userId, roles);
-                if (!success)
+                var (result, errors) = await _userRepository.AddRolesToUser(userId, roles);
+                if (!result)
                 {
-                    return NotFound(new { message = "User not found with the provided id." });
-                }
-                if (alreadyInRoles.Count > 0)
-                {
-                    return BadRequest(new { message = "User already has the specified roles.", roles = alreadyInRoles });
+                    return BadRequest(new { message = errors });
                 }
                 return Ok(new { message = "Roles added to User successfully." });
             }

@@ -12,10 +12,10 @@ namespace P7CreateRestApi.Controllers
     [ApiController]
     public class TradeController : ControllerBase
     {
-        private readonly TradeRepository _tradeRepository;
+        private readonly ITradeRepository _tradeRepository;
         private readonly ILogger<TradeController> _logger;
 
-        public TradeController(TradeRepository tradeRepository, ILogger<TradeController> logger)
+        public TradeController(ITradeRepository tradeRepository, ILogger<TradeController> logger)
         {
             _tradeRepository = tradeRepository;
             _logger = logger;
@@ -65,26 +65,22 @@ namespace P7CreateRestApi.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateTrade(int id, TradeDto tradeDto)
         {
-            if (id != tradeDto.TradeId)
-            {
-                return BadRequest(new { message = "The provided id does not match the id in the request." });
-            }
-
             try
             {
                 _logger.LogInformation("Updating Trade");
-                var updatedTrade = await _tradeRepository.UpdateTrade(id, tradeDto);
-                if (updatedTrade == null)
+                var result = await _tradeRepository.UpdateTrade(id, tradeDto);
+
+                if (result == null)
                 {
                     return NotFound(new { message = "Trade not found with the provided id." });
                 }
 
-                return Ok(new { message = "Trade updated successfully.", updatedTrade });
+                return Ok(result);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                return NotFound(new { message = "An error occurred while updating the Trade." });
+                return StatusCode(500, new { message = "An error occurred while updating the Trade." });
             }
         }
 

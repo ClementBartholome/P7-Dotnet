@@ -11,10 +11,10 @@ namespace P7CreateRestApi.Controllers
     [ApiController]
     public class RatingController : ControllerBase
     {
-        private readonly RatingRepository _ratingRepository;
+        private readonly IRatingRepository _ratingRepository;
         private readonly ILogger<RatingController> _logger;
 
-        public RatingController(RatingRepository ratingRepository, ILogger<RatingController> logger)
+        public RatingController(IRatingRepository ratingRepository, ILogger<RatingController> logger)
         {
             _ratingRepository = ratingRepository;
             _logger = logger;
@@ -22,17 +22,18 @@ namespace P7CreateRestApi.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<RatingDto>>> GetRatings()
+        public async Task<ActionResult<IEnumerable<BidListDto>>> GetRatings()
         {
             _logger.LogInformation("Retrieving Ratings");
             try
             {
-                var ratings = _ratingRepository.GetRatings();
+                var ratings = await _ratingRepository.GetRatings();
+                _logger.LogInformation("Successfully retrieved Ratings");
                 return Ok(ratings);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                _logger.LogError("An error occurred while retrieving the Ratings: {Message}", e.Message);
                 return StatusCode(500, new { message = "An error occurred while retrieving the Ratings." });
             }
         }
@@ -64,11 +65,6 @@ namespace P7CreateRestApi.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateRating(int id, RatingDto ratingDto)
         {
-            if (id != ratingDto.Id)
-            {
-                return BadRequest(new { message = "The provided id does not match the id in the request." });
-            }
-
             try
             {
                 _logger.LogInformation("Updating Rating");
@@ -82,8 +78,8 @@ namespace P7CreateRestApi.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
-                return NotFound(new { message = "An error occurred while updating the Rating." });
+                _logger.LogError("An error occurred while updating the BidList with id {Id}: {Message}", id, e.Message);
+                return StatusCode(500, new { message = "An error occurred while updating the Rating." });
             }
         }
 

@@ -2,12 +2,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using P7CreateRestApi.Data;
+using P7CreateRestApi.Interfaces;
 using P7CreateRestApi.Models.Dto;
 
 
 namespace P7CreateRestApi.Repositories
 {
-    public class CurveRepository
+    public class CurveRepository : ICurveRepository
     {
         private readonly LocalDbContext _context;
 
@@ -53,15 +54,12 @@ namespace P7CreateRestApi.Repositories
             {
                 return null;
             }
-
             var curvePoint = await _context.CurvePoints.FindAsync(id);
 
-            if (curvePoint == null) return curvePoint;
-            curvePoint.CurveId = curvePointDto.CurveId;
+            curvePoint!.CurveId = curvePointDto.CurveId;
             curvePoint.Term = curvePointDto.Term;
             curvePoint.CurvePointValue = curvePointDto.CurvePointValue;
             await _context.SaveChangesAsync();
-
             return curvePoint;
         }
         

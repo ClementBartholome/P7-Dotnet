@@ -6,7 +6,7 @@ using P7CreateRestApi.Data;
 
 namespace P7CreateRestApi.Repositories
 {
-    public class TradeRepository
+    public class TradeRepository : ITradeRepository
     {
         private readonly LocalDbContext _context;
 
@@ -35,7 +35,9 @@ namespace P7CreateRestApi.Repositories
                     Book = trade.Book,
                     CreationName = trade.CreationName,
                     RevisionName = trade.RevisionName,
-                    DealName = trade.DealName
+                    DealName = trade.DealName,
+                    CreationDate = trade.CreationDate,
+                    RevisionDate = trade.RevisionDate
                 })
                 .ToListAsync();
         }
@@ -66,7 +68,9 @@ namespace P7CreateRestApi.Repositories
                 Book = trade.Book,
                 CreationName = trade.CreationName,
                 RevisionName = trade.RevisionName,
-                DealName = trade.DealName
+                DealName = trade.DealName,
+                CreationDate = trade.CreationDate,
+                RevisionDate = trade.RevisionDate
             };
         }
 
@@ -94,6 +98,8 @@ namespace P7CreateRestApi.Repositories
             trade.CreationName = tradeDto.CreationName;
             trade.RevisionName = tradeDto.RevisionName;
             trade.DealName = tradeDto.DealName;
+            trade.CreationDate = tradeDto.CreationDate;
+            trade.RevisionDate = tradeDto.RevisionDate;
 
             _context.Set<Trade>().Update(trade);
             await _context.SaveChangesAsync();
@@ -118,7 +124,9 @@ namespace P7CreateRestApi.Repositories
                 Book = tradeDto.Book,
                 CreationName = tradeDto.CreationName,
                 RevisionName = tradeDto.RevisionName,
-                DealName = tradeDto.DealName
+                DealName = tradeDto.DealName,
+                CreationDate = tradeDto.CreationDate,
+                RevisionDate = tradeDto.RevisionDate
             };
 
             _context.Trades.Add(trade);
@@ -129,7 +137,6 @@ namespace P7CreateRestApi.Repositories
         public async Task<bool> DeleteTrade(int id)
         {
             var trade = await _context.Trades.FindAsync(id);
-            
             if (trade == null)
             {
                 return false;

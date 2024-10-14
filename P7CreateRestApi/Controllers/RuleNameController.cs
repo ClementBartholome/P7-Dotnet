@@ -12,10 +12,10 @@ namespace P7CreateRestApi.Controllers
     [ApiController]
     public class RuleController : ControllerBase
     {
-        private readonly RuleRepository _ruleRepository;
+        private readonly IRuleRepository _ruleRepository;
         private readonly ILogger<RuleController> _logger;
 
-        public RuleController(RuleRepository ruleRepository, ILogger<RuleController> logger)
+        public RuleController(IRuleRepository ruleRepository, ILogger<RuleController> logger)
         {
             _ruleRepository = ruleRepository;
             _logger = logger;
@@ -28,7 +28,8 @@ namespace P7CreateRestApi.Controllers
             _logger.LogInformation("Retrieving Rules");
             try
             {
-                return await _ruleRepository.GetRules();
+                var rules = await _ruleRepository.GetRules();
+                return Ok(rules);
             }
             catch (Exception e)
             {
@@ -51,7 +52,7 @@ namespace P7CreateRestApi.Controllers
                     return NotFound(new { message = "Rule not found with the provided id." });
                 }
 
-                return ruleDto;
+                return Ok(ruleDto);
             }
             catch (Exception e)
             {
@@ -85,7 +86,7 @@ namespace P7CreateRestApi.Controllers
                     SqlPart = updatedRule.SqlPart
                 };
 
-                return Ok(new { message = "BidList updated successfully.", updatedBidList = updatedRuleDto });
+                return Ok(new { message = "Rule updated successfully.", updatedBidList = updatedRuleDto });
             }
             catch (DbUpdateConcurrencyException)
             {

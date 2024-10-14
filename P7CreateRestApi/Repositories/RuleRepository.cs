@@ -6,7 +6,7 @@ using P7CreateRestApi.Models.Dto;
 
 namespace P7CreateRestApi.Repositories;
 
-public class RuleRepository
+public class RuleRepository : IRuleRepository
 {
     private readonly LocalDbContext _context;
 
@@ -96,20 +96,20 @@ public class RuleRepository
     
     public async Task<bool> DeleteRule(int id)
     {
-        if (!RuleExists(id))
+        var rule = await _context.RuleNames.FindAsync(id);
+
+        if (rule == null)
         {
             return false;
         }
 
-        var rule = await _context.RuleNames.FindAsync(id);
 
-        if (rule == null) return false;
         _context.RuleNames.Remove(rule);
         await _context.SaveChangesAsync();
         return true;
     }
 
-    private bool RuleExists(int id)
+    public bool RuleExists(int id)
     {
         return _context.RuleNames.Any(e => e.Id == id);
     }   
