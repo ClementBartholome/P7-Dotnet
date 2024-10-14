@@ -59,12 +59,12 @@ builder.Services.Configure<IdentityOptions>(options =>
 });
 
 builder.Services.AddScoped<IBidRepository, BidRepository>();
-builder.Services.AddScoped<CurveRepository>();
+builder.Services.AddScoped<ICurveRepository, CurveRepository>();
 builder.Services.AddScoped<RatingRepository>();
 builder.Services.AddScoped<RuleRepository>();
 builder.Services.AddScoped<TradeRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 
 builder.Services.AddAuthorization(options =>
 {
