@@ -14,10 +14,10 @@ public class AuthController : ControllerBase
 {
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
-    private readonly JwtService _jwtService;
+    private readonly IJwtService _jwtService;
     private readonly ILogger<AuthController> _logger;
 
-    public AuthController(UserManager<User> userManager, SignInManager<User> signInManager, JwtService jwtService, ILogger<AuthController> logger)
+    public AuthController(UserManager<User> userManager, SignInManager<User> signInManager, IJwtService jwtService, ILogger<AuthController> logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
