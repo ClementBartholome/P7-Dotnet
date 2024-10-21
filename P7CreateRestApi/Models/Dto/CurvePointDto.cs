@@ -14,4 +14,9 @@ public class CurvePointDto
 
     [Range(0, double.MaxValue, ErrorMessage = "CurvePointValue must be a non-negative number.")]
     public double? CurvePointValue { get; set; }
+    
+    public DateTime CreationDate { get; set; } = DateTime.Now;
+    public DateTime AsOfDate { get; set; } = DateTime.Now;
+
+
 }

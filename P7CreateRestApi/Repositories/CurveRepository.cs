@@ -69,7 +69,9 @@ namespace P7CreateRestApi.Repositories
             {
                 CurveId = curvePointDto.CurveId,
                 Term = curvePointDto.Term,
-                CurvePointValue = curvePointDto.CurvePointValue
+                CurvePointValue = curvePointDto.CurvePointValue,
+                CreationDate = curvePointDto.CreationDate,
+                AsOfDate = curvePointDto.AsOfDate
             };
 
             _context.CurvePoints.Add(curvePoint);
