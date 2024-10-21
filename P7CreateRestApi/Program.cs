@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -138,7 +139,21 @@ builder.Services.AddSwaggerGen(option =>
     });
 });
 
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "X-CSRF-TOKEN";
+});
+
 var app = builder.Build();
+
+app.Use((context, next) =>
+{
+    var antiforgery = context.RequestServices.GetRequiredService<IAntiforgery>();
+    var tokens = antiforgery.GetAndStoreTokens(context);
+    context.Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken!,
+        new CookieOptions { HttpOnly = false });
+    return next(context);
+});
 
 using (var scope = app.Services.CreateScope())
 {
