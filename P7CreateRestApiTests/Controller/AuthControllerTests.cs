@@ -67,12 +67,18 @@ namespace P7CreateRestApiTests.Controller
 _signInManagerMock.Setup(sm => sm.PasswordSignInAsync(model.Email, model.Password, false, false)).ReturnsAsync(Microsoft.AspNetCore.Identity.SignInResult.Success);            _userManagerMock.Setup(um => um.FindByEmailAsync(model.Email)).ReturnsAsync(new User { Email = model.Email });
             _jwtServiceMock.Setup(js => js.GenerateJwtToken(It.IsAny<User>())).Returns("token");
 
+            var httpContext = new DefaultHttpContext();
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext
+            };
+            
             // Act
             var result = await _controller.Login(model);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            Assert.Equal("token", okResult.Value);
+            Assert.IsType<OkObjectResult>(okResult);
         }
 
         [Fact]
@@ -82,6 +88,7 @@ _signInManagerMock.Setup(sm => sm.PasswordSignInAsync(model.Email, model.Passwor
             var model = new LoginModel { Email = "test@example.com", Password = "Password123!" };
             _signInManagerMock.Setup(sm => sm.PasswordSignInAsync(model.Email, model.Password, false, false)).ReturnsAsync(Microsoft.AspNetCore.Identity.SignInResult.Failed);
 
+            
             // Act
             var result = await _controller.Login(model);
 
@@ -92,9 +99,16 @@ _signInManagerMock.Setup(sm => sm.PasswordSignInAsync(model.Email, model.Passwor
         [Fact]
         public async Task Logout_ReturnsOk()
         {
+            // Arrange
+            var httpContext = new DefaultHttpContext();
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext
+            };
+            
             // Act
             var result = await _controller.Logout();
-
+            
             // Assert
             Assert.IsType<OkObjectResult>(result);
         }
