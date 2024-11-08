@@ -16,8 +16,4 @@ public class UserDto
 
     [StringLength(100, ErrorMessage = "FullName cannot exceed 100 characters.")]
     public string FullName { get; set; }
-
-    [Required]
-    public IList<string> Roles { get; set; }
-    
 }
