@@ -26,7 +26,7 @@ namespace P7CreateRestApi.Controllers
         /// Retrieves all users.
         /// </summary>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<UserReadDto>>> GetUsers()
         {
             _logger.LogInformation("Retrieving Users");
             try
