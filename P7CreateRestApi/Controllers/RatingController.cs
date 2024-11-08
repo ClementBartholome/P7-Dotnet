@@ -22,7 +22,7 @@ namespace P7CreateRestApi.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<BidListDto>>> GetRatings()
+        public async Task<ActionResult<IEnumerable<RatingDto>>> GetRatings()
         {
             _logger.LogInformation("Retrieving Ratings");
             try
