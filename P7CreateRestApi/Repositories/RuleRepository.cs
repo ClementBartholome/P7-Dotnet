@@ -15,7 +15,7 @@ public class RuleRepository : IRuleRepository
         _context = context;
     }
 
-    public async Task<ActionResult<IEnumerable<RuleDto>>> GetRules()
+    public async Task<IEnumerable<RuleDto>> GetRules()
     {
         return await _context.RuleNames
             .Select(rule => new RuleDto

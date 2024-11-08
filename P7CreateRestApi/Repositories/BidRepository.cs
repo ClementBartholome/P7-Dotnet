@@ -17,7 +17,7 @@ namespace P7CreateRestApi.Repositories
             _context = context;
         }
 
-        public async Task<ActionResult<IEnumerable<BidListDto>>> GetBidLists()
+        public async Task<IEnumerable<BidListDto>> GetBidLists()
         {
             return await _context.BidLists
                 .Select(bidList => new BidListDto

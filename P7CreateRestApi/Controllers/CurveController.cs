@@ -26,7 +26,7 @@ namespace P7CreateRestApi.Controllers
         // GET: Curve
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<CurvePointDto>>> GetCurves()
+        public async Task<ActionResult> GetCurves()
         {
             _logger.LogInformation("Retrieving Curves");
             try

@@ -6,7 +6,7 @@ namespace P7CreateRestApi.Interfaces;
 
 public interface IBidRepository
 {
-    Task<ActionResult<IEnumerable<BidListDto>>> GetBidLists();
+    Task<IEnumerable<BidListDto>> GetBidLists();
     Task<BidListDto?> GetBidList(int id);
     Task<BidList?> UpdateBidList(int id, BidListDto bidListDto);
     Task<BidList> PostBidList(BidListDto bidListDto);

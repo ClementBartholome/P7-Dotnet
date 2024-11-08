@@ -6,7 +6,7 @@ namespace P7CreateRestApi.Repositories;
 
 public interface ITradeRepository
 {
-    Task<ActionResult<IEnumerable<TradeDto>>> GetTrades();
+    Task<IEnumerable<TradeDto>> GetTrades();
     Task<TradeDto?> GetTrade(int id);
     Task<Trade?> UpdateTrade(int id, TradeDto tradeDto);
     Task<Trade> PostTrade(TradeDto tradeDto);

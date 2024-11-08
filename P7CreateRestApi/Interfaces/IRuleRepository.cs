@@ -6,7 +6,7 @@ namespace P7CreateRestApi.Repositories;
 
 public interface IRuleRepository
 {
-    Task<ActionResult<IEnumerable<RuleDto>>> GetRules();
+    Task<IEnumerable<RuleDto>> GetRules();
     Task<RuleDto?> GetRule(int id);
     Task<RuleName?> UpdateRule(int id, RuleDto ruleDto);
     Task<RuleName> PostRule(RuleDto ruleDto);

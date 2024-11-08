@@ -62,6 +62,20 @@ namespace P7CreateRestApiTests.Repository
             Assert.NotNull(result);
             Assert.Equal("User1", result.UserName);
         }
+        
+        [Fact]
+        public async Task GetUser_WhenUserIsNull_ReturnsNull()
+        {
+            // Arrange
+            _fixture.ClearDatabase();
+
+            // Act
+            var result = await _repository.GetUser("1");
+
+            // Assert
+            Assert.Null(result);
+        }
+        
         #endregion
 
         #region UpdateUser

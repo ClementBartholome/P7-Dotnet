@@ -23,7 +23,7 @@ namespace P7CreateRestApi.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<RuleDto>>> GetRules()
+        public async Task<ActionResult> GetRules()
         {
             _logger.LogInformation("Retrieving Rules");
             try

@@ -17,7 +17,7 @@ namespace P7CreateRestApi.Repositories
             _context = context;
         }
         
-        public async Task<ActionResult<IEnumerable<CurvePointDto>>> GetCurves()
+        public async Task<IEnumerable<CurvePointDto>> GetCurves()
         {
             return await _context.CurvePoints
                 .Select(curvePoint => new CurvePointDto

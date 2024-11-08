@@ -27,7 +27,7 @@ public class TradeControllerTests
         var result = await _controller.GetTrades();
         
         // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var okResult = Assert.IsType<OkObjectResult>(result);
         
         Assert.Equal(200, okResult.StatusCode);
     }
@@ -42,8 +42,8 @@ public class TradeControllerTests
         var result = await _controller.GetTrades();
         
         // Assert
-        Assert.IsType<ObjectResult>(result.Result);
-        Assert.Equal(500, (result.Result as ObjectResult)?.StatusCode);
+        Assert.IsType<ObjectResult>(result);
+        Assert.Equal(500, (result as ObjectResult)?.StatusCode);
     }
     
     #endregion

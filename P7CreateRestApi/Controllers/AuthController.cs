@@ -49,7 +49,7 @@ public class AuthController : ControllerBase
     [AllowAnonymous]
     [SwaggerOperation(
         Description =
-            "Admin account credentials: Email: admin@example.com, Password: Password123$"
+            "Admin credentials => Email: admin@example.com, Password: Password123$. Normal user credentials => Email: user@example.com, Password: Password123$"
     )]
     public async Task<IActionResult> Login(LoginModel model)
     {

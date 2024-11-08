@@ -26,7 +26,7 @@ namespace P7CreateRestApi.Controllers
         // GET: BidList
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<BidListDto>>> GetBidLists()
+        public async Task<ActionResult> GetBidLists()
         {
             _logger.LogInformation("Retrieving BidLists");
             try

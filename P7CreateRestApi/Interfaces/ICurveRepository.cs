@@ -6,7 +6,7 @@ namespace P7CreateRestApi.Interfaces
 {
     public interface ICurveRepository
     {
-        Task<ActionResult<IEnumerable<CurvePointDto>>> GetCurves();
+        Task<IEnumerable<CurvePointDto>> GetCurves();
         Task<CurvePointDto?> GetCurve(int id);
         Task<CurvePoint?> UpdateCurve(int id, CurvePointDto curvePointDto);
         Task<CurvePoint> PostCurve(CurvePointDto curvePointDto);

@@ -31,7 +31,7 @@ public class RuleRepositoryTests : IClassFixture<LocalDbContextFixture>
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(2, result.Value?.Count());
+        Assert.Equal(2, result.Count());
     }
     [Fact]
     public async Task GetRules_ReturnsNoContent()
@@ -44,7 +44,7 @@ public class RuleRepositoryTests : IClassFixture<LocalDbContextFixture>
 
         // Assert
         Assert.NotNull(result);
-        Assert.Empty(result.Value);
+        Assert.Empty(result);
     }
     
     #endregion

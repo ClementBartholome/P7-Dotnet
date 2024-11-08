@@ -15,7 +15,7 @@ namespace P7CreateRestApi.Repositories
             _context = context;
         }
 
-        public async Task<ActionResult<IEnumerable<TradeDto>>> GetTrades()
+        public async Task<IEnumerable<TradeDto>> GetTrades()
         {
             return await _context.Trades
                 .Select(trade => new TradeDto

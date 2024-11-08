@@ -23,7 +23,7 @@ namespace P7CreateRestApi.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<TradeDto>>> GetTrades()
+        public async Task<ActionResult> GetTrades()
         {
             _logger.LogInformation("Retrieving Trades");
             try

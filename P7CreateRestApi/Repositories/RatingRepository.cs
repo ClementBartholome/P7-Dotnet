@@ -15,7 +15,7 @@ namespace P7CreateRestApi.Repositories
             _context = context;
         }
 
-        public async Task<ActionResult<IEnumerable<RatingDto>>> GetRatings()
+        public async Task<IEnumerable<RatingDto>> GetRatings()
         {
             return await _context.Ratings
                 .Select(rating => new RatingDto

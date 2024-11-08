@@ -30,7 +30,7 @@ public class BidListControllerTests : IClassFixture<LocalDbContextFixture>
         var result = await _controller.GetBidLists();
 
         // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var okResult = Assert.IsType<OkObjectResult>(result);
         
         Assert.Equal(200, okResult.StatusCode);
     }
@@ -45,8 +45,8 @@ public class BidListControllerTests : IClassFixture<LocalDbContextFixture>
         var result = await _controller.GetBidLists();
 
         // Assert
-        Assert.IsType<ObjectResult>(result.Result);
-        Assert.Equal(500, (result.Result as ObjectResult)?.StatusCode);
+        Assert.IsType<ObjectResult>(result);
+        Assert.Equal(500, (result as ObjectResult)?.StatusCode);
     }
     
     #endregion
