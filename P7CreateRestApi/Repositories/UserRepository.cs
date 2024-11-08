@@ -20,14 +20,33 @@ namespace P7CreateRestApi.Repositories
             _userManager = userManager;
         }
 
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<UserReadDto>>> GetUsers()
         {
-            return await _context.Users.ToListAsync();
+            var users = await _context.Users.ToListAsync();
+            
+            return users.Select(user => new UserReadDto
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                FullName = user.FullName
+            }).ToList();
         }
 
-        public async Task<User?> GetUser(string id)
+        public async Task<UserReadDto?> GetUser(string id)
         {
-            return await _context.Users.FindAsync(id);
+            var user = await _context.Users.FindAsync(id);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            return new UserReadDto
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                FullName = user.FullName
+            };
         }
 
         public async Task<User?> UpdateUser(string id, UserDto userDto)
