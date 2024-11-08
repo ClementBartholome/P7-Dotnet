@@ -4,10 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using P7CreateRestApi.Domain;
 using P7CreateRestApi.Models;
 using P7CreateRestApi.Services;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace P7CreateRestApi.Controllers;
 
-[Route("api/[controller]")]
+[Route("[controller]")]
 [ApiController]
 [Authorize]
 public class AuthController : ControllerBase
@@ -17,7 +18,8 @@ public class AuthController : ControllerBase
     private readonly IJwtService _jwtService;
     private readonly ILogger<AuthController> _logger;
 
-    public AuthController(UserManager<User> userManager, SignInManager<User> signInManager, IJwtService jwtService, ILogger<AuthController> logger)
+    public AuthController(UserManager<User> userManager, SignInManager<User> signInManager, IJwtService jwtService,
+        ILogger<AuthController> logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -30,7 +32,8 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Register(RegisterModel model)
     {
         _logger.LogInformation("Registering User");
-        var user = new User { UserName = model.Email, FullName = model.FullName, Email = model.Email, EmailConfirmed = true };
+        var user = new User
+            { UserName = model.Email, FullName = model.FullName, Email = model.Email, EmailConfirmed = true };
         var result = await _userManager.CreateAsync(user, model.Password);
         if (result.Succeeded)
         {
@@ -44,6 +47,10 @@ public class AuthController : ControllerBase
 
     [HttpPost("login")]
     [AllowAnonymous]
+    [SwaggerOperation(
+        Description =
+            "Admin account credentials: Email: admin@example.com, Password: Password123$"
+    )]
     public async Task<IActionResult> Login(LoginModel model)
     {
         _logger.LogInformation("Login method called with email: {Email}", model.Email);
@@ -53,8 +60,20 @@ public class AuthController : ControllerBase
             var user = await _userManager.FindByEmailAsync(model.Email);
             var token = _jwtService.GenerateJwtToken(user);
             _logger.LogInformation("User logged in successfully with email: {Email}", model.Email);
-            return Ok(token);
+
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true, // empêche les scripts côté client d'accéder au cookie
+                Secure = true, // le cookie ne sera envoyé que sur des connexions HTTPS
+                SameSite = SameSiteMode
+                    .Strict, // empêche le navigateur d'envoyer le cookie avec des requêtes de site croisé
+                Expires = DateTime.UtcNow.AddHours(1)
+            };
+            Response.Cookies.Append("jwt", token, cookieOptions);
+
+            return Ok(new { message = "Login successful" });
         }
+
         _logger.LogWarning("Login failed for email: {Email}", model.Email);
         return Unauthorized();
     }
@@ -64,6 +83,9 @@ public class AuthController : ControllerBase
     {
         _logger.LogInformation("Logout method called");
         await _signInManager.SignOutAsync();
+
+        Response.Cookies.Delete("jwt");
+
         _logger.LogInformation("User logged out successfully");
         return Ok(new { message = "User logged out successfully" });
     }
