@@ -27,7 +27,7 @@ public class UserControllerTests
     {
         // Arrange
         var userId = "testUserId";
-        var user = new User();
+        var user = new UserReadDto();
         _userRepositoryMock.Setup(repo => repo.GetUser(userId))
             .ReturnsAsync(user);
 
@@ -46,7 +46,7 @@ public class UserControllerTests
         // Arrange
         var userId = "testUserId";
         _userRepositoryMock.Setup(repo => repo.GetUser(userId))
-            .ReturnsAsync((User)null!);
+            .ReturnsAsync((UserReadDto)null!);
 
         // Act
         var result = await _controller.GetUser(userId);
@@ -82,7 +82,7 @@ public class UserControllerTests
     public async Task GetUsers_ReturnsOk()
     {
         // Arrange
-        var users = new List<User>();
+        var users = new List<UserReadDto>();
         _userRepositoryMock.Setup(repo => repo.GetUsers())
             .ReturnsAsync(users);
 
@@ -90,7 +90,7 @@ public class UserControllerTests
         var result = await _controller.GetUsers();
 
         // Assert
-        var actionResult = Assert.IsType<ActionResult<IEnumerable<User>>>(result);
+        var actionResult = Assert.IsType<ActionResult<IEnumerable<UserReadDto>>>(result);
         var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
         Assert.Equal(200, okResult.StatusCode);
     }
@@ -106,7 +106,7 @@ public class UserControllerTests
         var result = await _controller.GetUsers();
 
         // Assert
-        var actionResult = Assert.IsType<ActionResult<IEnumerable<User>>>(result);
+        var actionResult = Assert.IsType<ActionResult<IEnumerable<UserReadDto>>>(result);
         var statusCodeResult = Assert.IsType<ObjectResult>(actionResult.Result);
         Assert.Equal(500, statusCodeResult.StatusCode);
     }
