@@ -6,8 +6,8 @@ namespace P7CreateRestApi.Interfaces;
 
 public interface IUserRepository
 {
-    Task<ActionResult<IEnumerable<User>>> GetUsers();
-    Task<User?> GetUser(string id);
+    Task<ActionResult<IEnumerable<UserReadDto>>> GetUsers();
+    Task<UserReadDto?> GetUser(string id);
     Task<User?> UpdateUser(string id, UserDto userDto);
     Task<bool> DeleteUser(string id);
     Task<(bool Success, List<string> AlreadyInRoles)> AddRolesToUser(string id, List<string> roles);
