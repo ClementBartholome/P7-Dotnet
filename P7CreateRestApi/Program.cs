@@ -114,6 +114,7 @@ builder.Services.AddSwaggerGen(option =>
     
     option.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo API", Version = "v1" });
     option.IncludeXmlComments(xmlPath);
+    option.EnableAnnotations();
     option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -150,9 +151,19 @@ app.Use((context, next) =>
 {
     var antiforgery = context.RequestServices.GetRequiredService<IAntiforgery>();
     var tokens = antiforgery.GetAndStoreTokens(context);
-    context.Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken!,
+    context.Response.Cookies.Append("X-CSRF-TOKEN", tokens.RequestToken!,
         new CookieOptions { HttpOnly = false });
     return next(context);
+});
+
+app.Use(async (context, next) =>
+{
+    var token = context.Request.Cookies["jwt"];
+    if (!string.IsNullOrEmpty(token))
+    {
+        context.Request.Headers.Add("Authorization", $"Bearer {token}");
+    }
+    await next();
 });
 
 using (var scope = app.Services.CreateScope())
